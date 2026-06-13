@@ -53,6 +53,54 @@ class ExpenseRepository {
   findByUserId = (userId: string) => {
     return Expense.find({ user_id: userId });
   };
+
+  // Analytics
+
+  // Expense by category
+  expenseByCategory = () => {
+    return Expense.aggregate([
+      {
+        $group: {
+          _id: "$category",
+          totalExpense: { $sum: "$amount" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          category: "$_id",
+          totalExpense: 1,
+        },
+      },
+    ]);
+  };
+
+  // Top Spending Users
+  topSpendingUser = () => {
+    return Expense.aggregate([
+      { $group: { _id: "$userId", totalSpent: { $sum: "$amount" } } },
+      { $sort: { totalSpent: -1 } },
+    ]);
+  };
+
+  // Average Expense Amount
+  average = () => {
+    return Expense.aggregate([
+      { $group: { _id: null, averageExpense: { $avg: "$amount" } } },
+    ]);
+  };
+
+  // Monthly Expense Report
+  monthly = () => {
+    return Expense.aggregate([
+      {
+        $group: {
+          _id: { month: { $month: "$createdAt" } },
+          totalExpense: { $sum: "$amount" },
+        },
+      },
+    ]);
+  };
 }
 
 export default ExpenseRepository;
