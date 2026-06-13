@@ -1,0 +1,89 @@
+services:
+  # MongoDB Database Service
+  mongo:
+    # Official mongodb image
+    image: mongo:7
+
+    # Custom container name
+    container_name: expense-flow-db
+
+    # Expose port
+    ports:
+      - "27017:27017"
+
+    # Automatically restart unless manually stopped
+    restart: unless-stopped
+
+    # Load MongoDB environment variables
+    env_file:
+      - .env
+
+    # Persist MongoDB data using named volume
+    volumes:
+      - mongo-data:/data/db
+
+    # Health check to ensure MongoDB is ready
+    healthcheck:
+      # Ping MongoDB server
+      test: [
+        "CMD-SHELL",
+        "mongosh --username $$MONGO_INITDB_ROOT_USERNAME --password $$MONGO_INITDB_ROOT_PASSWORD --authenticationDatabase admin --quiet --eval \"db.adminCommand('ping')\""
+      ]
+      interval: 30s               # Run health check every 30 seconds
+      timeout: 10s                # Health check timeout duration
+      retries: 5                  # Mark container unhealthy after 5 failures
+      start_period: 20s           # Wait before starting health checks
+
+
+    # Connect to custom bridge network
+    networks:
+      - expense-flow-network
+
+  # Backend API Service
+  api:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+
+    # Custom container name
+    container_name: expense-flow-backend
+
+    # Expose port
+    ports:
+      - "3000:3000"
+
+    # Automatically restart unless manually stopped
+    restart: unless-stopped
+
+    # Load MongoDB environment variables
+    env_file:
+      - .env
+
+    # Wait for MongoDB to become healthy before starting API
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+     # Health check to verify API is responding
+    healthcheck:
+      # Send HTTP request to /health endpoint
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/v1/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s               # Run health check every 30 seconds
+      timeout: 10s                # Health check timeout duration
+      retries: 3                  # Mark container unhealthy after 3 failures
+      start_period: 10s           # Wait 10 seconds before starting health checks
+
+    # Connect to custom bridge network
+    networks:
+      - expense-flow-network
+
+# Named Volumes
+volumes:
+  # Persistent storage for MongoDB data
+  mongo-data:
+
+# Define custom Docker network
+networks:
+  expense-flow-network:
+    # Default bridge network driver
+    driver: bridge
