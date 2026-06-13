@@ -4,6 +4,7 @@ import AdminController from "../controllers/admin.controller";
 import AdminRepository from "../repository/admin.repo";
 import ExpenseRepository from "../repository/expense.repo";
 import AnalyticsServices from "../services/analytics.service";
+import checkForJWT from "../middlewares/auth";
 
 const router = express.Router();
 
@@ -31,7 +32,7 @@ const adminController = new AdminController(adminRepo, analyticsService);
  *       500:
  *         description: Internal server error
  */
-router.get("/users", adminController.getAllUsershandler);
+router.get("/users", checkForJWT(), adminController.getAllUsershandler);
 
 /**
  * @swagger
@@ -45,7 +46,7 @@ router.get("/users", adminController.getAllUsershandler);
  *       500:
  *         description: Internal server error
  */
-router.get("/expenses", adminController.getAllExpenseshandler);
+router.get("/expenses", checkForJWT(), adminController.getAllExpenseshandler);
 
 /**
  * @swagger
@@ -59,7 +60,7 @@ router.get("/expenses", adminController.getAllExpenseshandler);
  *       500:
  *         description: Internal server error
  */
-router.get("/analytics/category", adminController.expenseByCategoryHandler);
+router.get("/analytics/category", checkForJWT(), adminController.expenseByCategoryHandler);
 
 /**
  * @swagger
@@ -73,7 +74,7 @@ router.get("/analytics/category", adminController.expenseByCategoryHandler);
  *       500:
  *         description: Internal server error
  */
-router.get("/analytics/top-users", adminController.topSpendingUsersHandler);
+router.get("/analytics/top-users", checkForJWT(), adminController.topSpendingUsersHandler);
 
 /**
  * @swagger
@@ -87,7 +88,7 @@ router.get("/analytics/top-users", adminController.topSpendingUsersHandler);
  *       500:
  *         description: Internal server error
  */
-router.get("/analytics/average", adminController.averageExpenseAmountHandler);
+router.get("/analytics/average", checkForJWT(), adminController.averageExpenseAmountHandler);
 
 /**
  * @swagger
@@ -101,6 +102,6 @@ router.get("/analytics/average", adminController.averageExpenseAmountHandler);
  *       500:
  *         description: Internal server error
  */
-router.get("/analytics/monthly", adminController.monthlyExpenseHandler);
+router.get("/analytics/monthly", checkForJWT(), adminController.monthlyExpenseHandler);
 
 export default router;

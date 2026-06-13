@@ -2,6 +2,7 @@ import express from "express";
 
 import ExpenseController from "../controllers/expense.controller";
 import ExpenseRepository from "../repository/expense.repo";
+import checkForJWT from "../middlewares/auth";
 
 const router = express.Router();
 const expenseRepo = new ExpenseRepository();
@@ -59,7 +60,7 @@ const expenseController = new ExpenseController(expenseRepo);
  *       401:
  *         description: Unauthorized
  */
-router.post("/new", expenseController.createExpenseHandler);
+router.post("/new", checkForJWT(), expenseController.createExpenseHandler);
 
 /**
  * @swagger
@@ -94,7 +95,7 @@ router.post("/new", expenseController.createExpenseHandler);
  *       401:
  *         description: Unauthorized
  */
-router.get("/my", expenseController.fetchMyExpenseHandler);
+router.get("/my", checkForJWT(), expenseController.fetchMyExpenseHandler);
 
 /**
  * @swagger
@@ -140,7 +141,7 @@ router.get("/my", expenseController.fetchMyExpenseHandler);
  *       401:
  *         description: Unauthorized
  */
-router.patch("/update/:id", expenseController.updateExpenseHandler);
+router.patch("/update/:id", checkForJWT(), expenseController.updateExpenseHandler);
 
 /**
  * @swagger
@@ -171,6 +172,6 @@ router.patch("/update/:id", expenseController.updateExpenseHandler);
  *       401:
  *         description: Unauthorized
  */
-router.delete("/delete/:id", expenseController.deleteExpenseHandler);
+router.delete("/delete/:id", checkForJWT(), expenseController.deleteExpenseHandler);
 
 export default router;
